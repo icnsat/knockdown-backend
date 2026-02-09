@@ -115,8 +115,9 @@ class LessonListSerializer(serializers.ModelSerializer):
         return None
 
 
+'''
 class UserLessonProgressSerializer(serializers.ModelSerializer):
-    """Ручное управление прогрессом пользователя"""
+    """DELETED - Ручное управление прогрессом пользователя"""
     lesson_title = serializers.CharField(source='lesson.title', read_only=True)
     lesson_type = serializers.CharField(
         source='lesson.lesson_type',
@@ -166,7 +167,7 @@ class UserLessonProgressSerializer(serializers.ModelSerializer):
 
 
 class LessonProgressUpdateSerializer(serializers.Serializer):
-    """Автоматическое обновление прогресса после тренировки"""
+    """REPLACED - Автоматическое обновление прогресса после тренировки"""
     lesson_id = serializers.IntegerField()
     speed = serializers.IntegerField(min_value=0)
     accuracy = serializers.FloatField(min_value=0, max_value=100)
@@ -211,25 +212,63 @@ class LessonProgressUpdateSerializer(serializers.Serializer):
 
         progress.save()
         return progress
+'''
 
 
-# class GeneratedLessonSerializer(serializers.Serializer):
-#     """Для ответа с сгенерированным уроком"""
-#     title = serializers.CharField()
-#     content = serializers.CharField()
-#     difficulty_level = serializers.IntegerField()
-#     lesson_type = serializers.CharField()
-#     target_letters = serializers.ListField(
-#         child=serializers.CharField(),
-#         required=False
-#     )
-#     target_bigrams = serializers.ListField(
-#         child=serializers.CharField(),
-#         required=False
-#     )
-#     word_count = serializers.IntegerField()
+class UserLessonProgressSerializer(serializers.ModelSerializer):
+    """Только для чтения прогресса. Создание/обновление - автоматически."""
+    lesson_title = serializers.CharField(source='lesson.title', read_only=True)
+    lesson_type = serializers.CharField(
+        source='lesson.lesson_type',
+        read_only=True
+    )
+    required_speed = serializers.IntegerField(
+        source='lesson.required_speed',
+        read_only=True
+    )
+    required_accuracy = serializers.FloatField(
+        source='lesson.required_accuracy',
+        read_only=True
+    )
+
+    class Meta:
+        model = UserLessonProgress
+        fields = [
+            'id',
+            'lesson',
+            'lesson_title',
+            'lesson_type',
+            'required_speed',
+            'required_accuracy',
+            'best_speed',
+            'best_accuracy',
+            'completion_count',
+            'last_completed_at',
+            'is_passed',
+            'passed_at',
+        ]
+        read_only_fields = fields
+
+
+'''
+class GeneratedLessonSerializer(serializers.Serializer):
+    """Для ответа с сгенерированным уроком"""
+    title = serializers.CharField()
+    content = serializers.CharField()
+    difficulty_level = serializers.IntegerField()
+    lesson_type = serializers.CharField()
+    target_letters = serializers.ListField(
+        child=serializers.CharField(),
+        required=False
+    )
+    target_bigrams = serializers.ListField(
+        child=serializers.CharField(),
+        required=False
+    )
+    word_count = serializers.IntegerField()
  
-#     def create(self, validated_data):
-#         """Создает временный урок (не сохраняет в БД)"""
-#         # Можно сохранить как временную запись или просто вернуть данные
-#         return validated_data
+    def create(self, validated_data):
+        """Создает временный урок (не сохраняет в БД)"""
+        # Можно сохранить как временную запись или просто вернуть данные
+        return validated_data
+'''

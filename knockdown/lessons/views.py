@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, permissions, status
 from rest_framework.views import APIView
 from rest_framework.decorators import action
@@ -8,7 +9,6 @@ from .serializers import (
     LessonDetailSerializer,
     LessonListSerializer,
     UserLessonProgressSerializer,
-    LessonProgressUpdateSerializer,
     # GeneratedLessonSerializer
 )
 # from .services import LessonGenerator
@@ -26,18 +26,20 @@ class LessonViewSet(viewsets.ModelViewSet):
         return LessonSerializer
 
     def get_permissions(self):
-        if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            return [permissions.IsAdminUser()]
-        return [permissions.IsAuthenticated()]
+        if self.action in ['list', 'retrieve']:
+            return [permissions.AllowAny()]
+        return [permissions.IsAdminUser()]
 
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context['request'] = self.request
-        return context
+# DELETED - DRF автоматически добавляет request в context
+    # def get_serializer_context(self):
+    #     context = super().get_serializer_context()
+    #     context['request'] = self.request
+    #     return context
 
 
+'''
 class UserLessonProgressViewSet(viewsets.ModelViewSet):
-    """Работа с прогрессом"""
+    """REPLACED - Работа с прогрессом (лучший показатель для каждого урока)"""
     serializer_class = UserLessonProgressSerializer  # Обычный сериализатор для ручной работы
     permission_classes = [permissions.IsAuthenticated]
 
@@ -58,6 +60,51 @@ class UserLessonProgressViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_200_OK
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+'''
+
+
+class UserLessonProgressListAPIView(APIView):
+    """Управление всеми прогрессами пользователя"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        """GET /api/lessons/progress/ - все прогрессы"""
+        progresses = UserLessonProgress.objects.filter(user=request.user)
+        serializer = UserLessonProgressSerializer(progresses, many=True)
+        return Response(serializer.data)
+
+    def delete(self, request):
+        """DELETE /api/lessons/progress/ - удалить ВСЕ прогрессы"""
+        count, _ = UserLessonProgress.objects.filter(user=request.user).delete()
+        return Response(
+            {'deleted': count},
+            status=status.HTTP_204_NO_CONTENT
+        )
+
+
+class UserLessonProgressDetailAPIView(APIView):
+    """Управление конкретным прогрессом"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, progress_id):
+        """GET /api/lessons/progress/{id}/ - один прогресс"""
+        progress = get_object_or_404(
+            UserLessonProgress,
+            id=progress_id,
+            user=request.user  # проверяем принадлежность
+        )
+        serializer = UserLessonProgressSerializer(progress)
+        return Response(serializer.data)
+
+    def delete(self, request, progress_id):
+        """DELETE /api/lessons/progress/{id}/ - удалить один прогресс"""
+        progress = get_object_or_404(
+            UserLessonProgress,
+            id=progress_id,
+            user=request.user
+        )
+        progress.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 '''

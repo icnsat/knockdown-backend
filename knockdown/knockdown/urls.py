@@ -39,7 +39,7 @@ urlpatterns = [
     # /jwt/verify/
     path('api/auth/', include('djoser.urls.jwt')),
 
-    # path('api/lessons/', include('lessons.urls')),
-    # path('api/stats/', include('stats.urls')),
+    path('api/lessons/', include('lessons.urls')),
+    path('api/stats/', include('stats.urls')),
     # path('api/users/', include('users.urls')),
 ]
