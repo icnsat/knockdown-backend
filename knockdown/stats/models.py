@@ -31,8 +31,8 @@ class TrainingSession(models.Model):
 
     def __str__(self):
         return (
-            f"{self.user.username} - {self.lesson.lesson_type}"
-            f" - {self.finished_at}"
+            f"{self.user.username}: {self.lesson.order_index}. "
+            f"{self.lesson.title} - {self.average_speed_wpm} wpm"
         )
 
 
@@ -53,8 +53,9 @@ class DailyStatistics(models.Model):
         indexes = [
             models.Index(fields=['user', '-date']),
         ]
+"""
 
-
+"""
 class LetterStatistics(models.Model):
     session = models.ForeignKey(TrainingSession, on_delete=models.CASCADE)
     user = models.ForeignKey('users.User', on_delete=models.CASCADE)  # денормализация
@@ -62,13 +63,15 @@ class LetterStatistics(models.Model):
     occurrences = models.IntegerField(default=0)
     errors = models.IntegerField(default=0)
     average_hit_time_ms = models.FloatField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         indexes = [
             models.Index(fields=['user', 'letter']),
         ]
+"""
 
-
+"""
 class DailyLetterStatistics(models.Model):
     user = models.ForeignKey('users.User', on_delete=models.CASCADE)
     date = models.DateField()
@@ -79,22 +82,33 @@ class DailyLetterStatistics(models.Model):
 
     class Meta:
         unique_together = ['user', 'date', 'letter']
+"""
 
 
 class BigramStatistics(models.Model):
     session = models.ForeignKey(TrainingSession, on_delete=models.CASCADE)
     user = models.ForeignKey('users.User', on_delete=models.CASCADE)
-    bigram = models.CharField(max_length=2)  # 'ab', 'оа'
+    bigram = models.CharField(
+        max_length=6,
+    )  # 'ab', 'a\t', '\ls\e', '\ls\rs'
     occurrences = models.IntegerField(default=0)
     errors = models.IntegerField(default=0)
     average_transition_time_ms = models.FloatField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         indexes = [
             models.Index(fields=['user', 'bigram']),
         ]
 
+    def __str__(self):
+        return (
+            f"{self.user.username}: {self.session.lesson.order_index}. "
+            f"{self.session.lesson.title} - '{self.bigram}'"
+        )
 
+
+"""
 class DailyBigramStatistics(models.Model):
     user = models.ForeignKey('users.User', on_delete=models.CASCADE)
     date = models.DateField()

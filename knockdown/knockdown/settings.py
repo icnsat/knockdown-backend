@@ -121,14 +121,15 @@ REST_FRAMEWORK = {
 }
 
 DJOSER = {
-    # 'USER_CREATE_PASSWORD_RETYPE': True,  # Pass confirmation upon registration
+    # 'USER_CREATE_PASSWORD_RETYPE': True,  # Pass confirmation upon registration - commented because it blocks custom serializer for user
     'SERIALIZERS': {
         'user_create': 'users.serializers.UserCreateSerializer',
         'user': 'users.serializers.UserSerializer',
         'current_user': 'users.serializers.UserSerializer',
     },
     'PERMISSIONS': {
-        'user': ['rest_framework.permissions.IsAuthenticated'],
+        # 'user': ['rest_framework.permissions.IsAuthenticated'], # changed to djoser (admin or current themself)
+        'user': ['djoser.permissions.CurrentUserOrAdmin'],
         'user_list': ['rest_framework.permissions.IsAdminUser'],
     }
 }

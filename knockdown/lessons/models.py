@@ -13,8 +13,8 @@ class Lesson(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     content = models.TextField()
-    difficulty_level = models.IntegerField()
-    lesson_type = models.CharField(max_length=20, choices=LESSON_TYPES)
+    difficulty_level = models.IntegerField() # change to >0
+    lesson_type = models.CharField(max_length=20, choices=LESSON_TYPES) # delete? generated lessons aren't being saved
     order_index = models.IntegerField(default=0)
     required_speed = models.IntegerField()
     required_accuracy = models.FloatField()
@@ -28,6 +28,7 @@ class Lesson(models.Model):
         return f"{self.order_index}. {self.title}"
 
 
+# only for existing lessons, not fot generated
 class UserLessonProgress(models.Model):
     user = models.ForeignKey('users.User', on_delete=models.CASCADE)
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
@@ -43,3 +44,7 @@ class UserLessonProgress(models.Model):
         indexes = [
             models.Index(fields=['user', 'is_passed']),
         ]
+        ordering = ['passed_at']
+
+    def __str__(self):
+        return f"{self.user.username}: {self.lesson.title}"
