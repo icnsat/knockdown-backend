@@ -59,3 +59,44 @@ class TrainingSessionSerializer(serializers.ModelSerializer):
             progress.passed_at = session.finished_at
 
         progress.save()
+
+    def validate_accuracy_percentage(self, value):
+        if value < 0 or value > 100:
+            raise serializers.ValidationError(
+                "Точность должна быть от 0 до 100%"
+            )
+        return value
+
+    def validate_average_speed_wpm(self, value):
+        if value < 0:
+            raise serializers.ValidationError(
+                "Скорость не может быть отрицательной"
+            )
+        return value
+
+    def validate(self, data):
+        """Дополнительные проверки"""
+        # Проверяем что finished_at > started_at
+        if data.get('started_at') and data.get('finished_at'):
+            if data['finished_at'] <= data['started_at']:
+                raise serializers.ValidationError({
+                    'finished_at':
+                    'Время окончания должно быть позже времени начала'
+                })
+
+        # Проверяем что длительность логична
+        if (
+            data.get('total_duration_seconds')
+            and data.get('started_at')
+            and data.get('finished_at')
+        ):
+            duration = (
+                data['finished_at'] - data['started_at']
+            ).total_seconds()
+            if abs(duration - data['total_duration_seconds']) > 5:  # допуск
+                raise serializers.ValidationError({
+                    'total_duration_seconds':
+                    'Длительность не соответствует времени начала/окончания'
+                })
+
+        return data

@@ -10,7 +10,12 @@ class TrainingSession(models.Model):
     # ]
 
     user = models.ForeignKey('users.User', on_delete=models.CASCADE)
-    lesson = models.ForeignKey('lessons.Lesson', on_delete=models.SET_NULL, null=True, blank=True)
+    lesson = models.ForeignKey(
+        'lessons.Lesson',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
     # exercise_type = models.CharField(max_length=20, choices=EXERCISE_TYPES)
     # lesson_title = models.CharField(max_length=255, blank=True)
 
