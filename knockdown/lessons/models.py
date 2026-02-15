@@ -48,3 +48,25 @@ class UserLessonProgress(models.Model):
 
     def __str__(self):
         return f"{self.user.username}: {self.lesson.title}"
+
+
+class DictionaryWord(models.Model):
+    """Словарь для генерации уроков"""
+    word = models.CharField(max_length=30, unique=True)  # само слово
+    length = models.IntegerField()  # длина слова
+    frequency = models.IntegerField(default=1)  # частотность (1-1000)
+
+    # Для быстрого поиска:
+    letters = models.CharField(max_length=30, db_index=True)  # уникальные буквы слова "влос"
+    bigrams = models.JSONField(default=list)  # все биграммы слова ["сл", "ло", "ов", "во"]
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['length']),
+            models.Index(fields=['frequency']),
+            models.Index(fields=['letters']),  # для поиска по буквам
+        ]
+        ordering = ['word']
+
+    def __str__(self):
+        return f"{self.word}"

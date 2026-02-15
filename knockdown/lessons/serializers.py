@@ -234,20 +234,55 @@ class UserLessonProgressSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserLessonProgress
         fields = [
-            'id',
-            'lesson',
-            'lesson_title',
-            'lesson_type',
-            'required_speed',
-            'required_accuracy',
-            'best_speed',
-            'best_accuracy',
-            'completion_count',
-            'last_completed_at',
-            'is_passed',
-            'passed_at',
+            'id', 'lesson', 'lesson_title', 'lesson_type',
+            'required_speed', 'required_accuracy',
+            'best_speed', 'best_accuracy', 'completion_count',
+            'last_completed_at', 'is_passed', 'passed_at',
         ]
         read_only_fields = fields
+
+    @staticmethod
+    def update_from_session(session):
+        """
+        Обновляет прогресс на основе данных тренировочной сессии
+        Вызывается из TrainingSessionSerializer
+        """
+        if not session.lesson:
+            return None
+
+        progress, created = UserLessonProgress.objects.get_or_create(
+            user=session.user,
+            lesson=session.lesson,
+            defaults={
+                'best_speed': session.average_speed_wpm,
+                'best_accuracy': session.accuracy_percentage,
+                'completion_count': 1,
+                'last_completed_at': session.finished_at
+            }
+        )
+
+        if not created:
+            # Обновляем лучшие результаты
+            if session.average_speed_wpm > progress.best_speed:
+                progress.best_speed = session.average_speed_wpm
+
+            if session.accuracy_percentage > progress.best_accuracy:
+                progress.best_accuracy = session.accuracy_percentage
+
+            progress.completion_count += 1
+            progress.last_completed_at = session.finished_at
+
+        # Проверяем выполнение требований урока
+        if (
+            session.average_speed_wpm >= session.lesson.required_speed and
+            session.accuracy_percentage >= session.lesson.required_accuracy and
+            not progress.is_passed
+        ):
+            progress.is_passed = True
+            progress.passed_at = session.finished_at
+
+        progress.save()
+        return progress
 
 
 '''

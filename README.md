@@ -30,7 +30,7 @@ URLs:
 Статистика
 - GET /api/stats/sessions/ - все сессии
 - GET /api/stats/sessions/{id}/ - детали одной сессии
-- POST /api/stats/sessions/ - сохранить сессию тренировки (с обновлением прогресса)
+- POST /api/stats/sessions/ - сохранить сессию тренировки (с обновлением прогресса и статистики букв и биграмм)
 - DELETE /api/stats/sessions/{id}/ - удалить сессию
 
 
@@ -47,5 +47,12 @@ URLs:
 - GET /api/stats/letters/, /bigrams/ - детальная статистика
 - GET /api/stats/problem-letters/, /problem-bigrams/ - проблемные зоны
 
+
+-->
+
+
+<!--
+Back -> Lesson Retrieve -> Front
+Front -> Stats (total and letters, bighrams agr) -> Back
 
 -->

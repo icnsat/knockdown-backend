@@ -1,64 +1,76 @@
 from rest_framework import serializers
-from .models import TrainingSession
-from lessons.models import UserLessonProgress
+from .models import TrainingSession, LetterStatistics, BigramStatistics
+from lessons.serializers import UserLessonProgressSerializer
+
+
+class LetterStatsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LetterStatistics
+        fields = ['letter', 'occurrences', 'errors', 'average_hit_time_ms']
+
+    def create(self, validated_data):
+        session = self.context['session']
+        return LetterStatistics.objects.create(
+            session=session,
+            user=session.user,
+            **validated_data
+        )
+
+
+class BigramStatsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BigramStatistics
+        fields = [
+            'bigram', 'occurrences', 'errors',
+            'average_transition_time_ms'
+        ]
+
+    def create(self, validated_data):
+        session = self.context['session']
+        return BigramStatistics.objects.create(
+            session=session,
+            user=session.user,
+            **validated_data
+        )
 
 
 class TrainingSessionSerializer(serializers.ModelSerializer):
     """Сохраняет сессию и автоматически обновляет прогресс"""
-    lesson_title = serializers.CharField(source='lesson.title', read_only=True)
+    # Поля для статистики (write_only - не возвращаем в ответе)
+    letter_stats = LetterStatsSerializer(
+        many=True,
+        write_only=True,
+        required=False
+    )
+    bigram_stats = BigramStatsSerializer(
+        many=True,
+        write_only=True,
+        required=False
+    )
+
+    # Поля для отображения
+    lesson_title = serializers.CharField(
+        source='lesson.title',
+        read_only=True
+    )
+    lesson_order = serializers.IntegerField(
+        source='lesson.order_index',
+        read_only=True
+    )
 
     class Meta:
         model = TrainingSession
         fields = [
-            'id', 'user', 'lesson', 'lesson_title',
-            'average_speed_wpm', 'accuracy_percentage',
+            'id', 'user', 'lesson', 'lesson_title', 'lesson_order',
             'total_duration_seconds', 'total_characters_typed', 'total_errors',
-            'started_at', 'finished_at', 'created_at'
+            'average_speed_wpm', 'accuracy_percentage',
+            'started_at', 'finished_at', 'created_at',
+            'letter_stats', 'bigram_stats'  # только для записи
         ]
-        read_only_fields = ['id', 'user', 'created_at', 'lesson_title']
-
-    def create(self, validated_data):
-        # 1. Сохраняем сессию
-        session = super().create(validated_data)
-
-        # 2. Обновляем прогресс прямо здесь
-        if session.lesson:
-            self.update_lesson_progress(session)
-
-        return session
-
-    def update_lesson_progress(self, session):
-        """Вся логика прямо здесь"""
-
-        progress, created = UserLessonProgress.objects.get_or_create(
-            user=session.user,
-            lesson=session.lesson,
-            defaults={
-                'best_speed': session.average_speed_wpm,
-                'best_accuracy': session.accuracy_percentage,
-                'completion_count': 1,
-                'last_completed_at': session.finished_at
-            }
-        )
-
-        if not created:
-            if session.average_speed_wpm > progress.best_speed:
-                progress.best_speed = session.average_speed_wpm
-
-            if session.accuracy_percentage > progress.best_accuracy:
-                progress.best_accuracy = session.accuracy_percentage
-
-            progress.completion_count += 1
-            progress.last_completed_at = session.finished_at
-
-        # Проверяем прохождение
-        if (session.average_speed_wpm >= session.lesson.required_speed and
-           session.accuracy_percentage >= session.lesson.required_accuracy and
-           not progress.is_passed):
-            progress.is_passed = True
-            progress.passed_at = session.finished_at
-
-        progress.save()
+        read_only_fields = [
+            'id', 'user', 'created_at',
+            'lesson_title', 'lesson_order'
+        ]
 
     def validate_accuracy_percentage(self, value):
         if value < 0 or value > 100:
@@ -100,3 +112,35 @@ class TrainingSessionSerializer(serializers.ModelSerializer):
                 })
 
         return data
+
+    def create(self, validated_data):
+        # Извлекаем статистику
+        letter_stats_data = validated_data.pop('letter_stats', [])
+        bigram_stats_data = validated_data.pop('bigram_stats', [])
+
+        # 1. Сохраняем сессию
+        session = super().create(validated_data)
+
+        # 2. Обновляем прогресс урока
+        if session.lesson:
+            UserLessonProgressSerializer().update_from_session(session)
+
+        # 3. Сохраняем статистику букв
+        for data in letter_stats_data:
+            letter_serializer = LetterStatsSerializer(
+                data=data,
+                context={'session': session}
+            )
+            letter_serializer.is_valid(raise_exception=True)
+            letter_serializer.save()
+
+        # 4. Сохраняем статистику биграмм
+        for data in bigram_stats_data:
+            bigram_serializer = BigramStatsSerializer(
+                data=data,
+                context={'session': session}
+            )
+            bigram_serializer.is_valid(raise_exception=True)
+            bigram_serializer.save()
+
+        return session

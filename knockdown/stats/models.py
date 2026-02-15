@@ -60,11 +60,11 @@ class DailyStatistics(models.Model):
         ]
 """
 
-"""
+
 class LetterStatistics(models.Model):
     session = models.ForeignKey(TrainingSession, on_delete=models.CASCADE)
     user = models.ForeignKey('users.User', on_delete=models.CASCADE)  # денормализация
-    letter = models.CharField(max_length=1)
+    letter = models.CharField(max_length=3)   # спец клавиши
     occurrences = models.IntegerField(default=0)
     errors = models.IntegerField(default=0)
     average_hit_time_ms = models.FloatField()
@@ -74,7 +74,13 @@ class LetterStatistics(models.Model):
         indexes = [
             models.Index(fields=['user', 'letter']),
         ]
-"""
+
+    def __str__(self):
+        return (
+            f"{self.user.username}: {self.session.lesson.order_index}. "
+            f"{self.session.lesson.title} - '{self.letter}'"
+        )
+
 
 """
 class DailyLetterStatistics(models.Model):
