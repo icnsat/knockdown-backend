@@ -41,9 +41,6 @@ class TrainingSession(models.Model):
         )
 
 
-
-
-"""
 class DailyStatistics(models.Model):
     user = models.ForeignKey('users.User', on_delete=models.CASCADE)
     date = models.DateField()
@@ -58,7 +55,6 @@ class DailyStatistics(models.Model):
         indexes = [
             models.Index(fields=['user', '-date']),
         ]
-"""
 
 
 class LetterStatistics(models.Model):
@@ -82,7 +78,6 @@ class LetterStatistics(models.Model):
         )
 
 
-"""
 class DailyLetterStatistics(models.Model):
     user = models.ForeignKey('users.User', on_delete=models.CASCADE)
     date = models.DateField()
@@ -93,7 +88,6 @@ class DailyLetterStatistics(models.Model):
 
     class Meta:
         unique_together = ['user', 'date', 'letter']
-"""
 
 
 class BigramStatistics(models.Model):
@@ -119,7 +113,6 @@ class BigramStatistics(models.Model):
         )
 
 
-"""
 class DailyBigramStatistics(models.Model):
     user = models.ForeignKey('users.User', on_delete=models.CASCADE)
     date = models.DateField()
@@ -130,5 +123,3 @@ class DailyBigramStatistics(models.Model):
 
     class Meta:
         unique_together = ['user', 'date', 'bigram']
-
-"""

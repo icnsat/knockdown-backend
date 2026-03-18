@@ -285,8 +285,30 @@ class UserLessonProgressSerializer(serializers.ModelSerializer):
         return progress
 
 
-'''
-class GeneratedLessonSerializer(serializers.Serializer):
+class GenerateLessonRequestSerializer(serializers.Serializer):
+    """Для запроса генерации урока"""
+    type = serializers.ChoiceField(
+        choices=['letters', 'bigrams', 'mixed', 'auto'],
+        default='auto',
+        required=False
+    )
+    difficulty = serializers.IntegerField(
+        min_value=1, max_value=10, required=False
+    )
+    length = serializers.IntegerField(
+        min_value=50, max_value=500, required=False
+    )
+    target_letters = serializers.ListField(
+        child=serializers.CharField(max_length=1),
+        required=False
+    )
+    target_bigrams = serializers.ListField(
+        child=serializers.CharField(max_length=6),
+        required=False
+    )
+
+
+class GeneratedLessonResponseSerializer(serializers.Serializer):
     """Для ответа с сгенерированным уроком"""
     title = serializers.CharField()
     content = serializers.CharField()
@@ -301,9 +323,3 @@ class GeneratedLessonSerializer(serializers.Serializer):
         required=False
     )
     word_count = serializers.IntegerField()
- 
-    def create(self, validated_data):
-        """Создает временный урок (не сохраняет в БД)"""
-        # Можно сохранить как временную запись или просто вернуть данные
-        return validated_data
-'''

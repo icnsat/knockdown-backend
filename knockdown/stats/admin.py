@@ -1,9 +1,19 @@
 from django.contrib import admin
-from .models import TrainingSession, BigramStatistics, LetterStatistics
+from .models import (
+    TrainingSession,
+    BigramStatistics,
+    LetterStatistics,
+    DailyBigramStatistics,
+    DailyLetterStatistics,
+    DailyStatistics
+)
 from django import forms
 
 admin.site.register(TrainingSession)
 admin.site.register(LetterStatistics)
+admin.site.register(DailyBigramStatistics)
+admin.site.register(DailyLetterStatistics)
+admin.site.register(DailyStatistics)
 
 
 class BigramStatisticsForm(forms.ModelForm):

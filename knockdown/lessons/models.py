@@ -13,7 +13,7 @@ class Lesson(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     content = models.TextField()
-    difficulty_level = models.IntegerField() # change to >0
+    difficulty_level = models.IntegerField(default=1) # change to >0
     lesson_type = models.CharField(max_length=20, choices=LESSON_TYPES) # delete? generated lessons aren't being saved
     order_index = models.IntegerField(default=0)
     required_speed = models.IntegerField()

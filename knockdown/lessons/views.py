@@ -9,9 +9,10 @@ from .serializers import (
     LessonDetailSerializer,
     LessonListSerializer,
     UserLessonProgressSerializer,
-    # GeneratedLessonSerializer
+    GenerateLessonRequestSerializer,
+    GeneratedLessonResponseSerializer
 )
-# from .services import LessonGenerator
+from .services import LessonGenerator
 
 
 class LessonViewSet(viewsets.ModelViewSet):
@@ -107,38 +108,27 @@ class UserLessonProgressDetailAPIView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-'''
 class GenerateLessonView(APIView):
     """Генерация уроков"""
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        """
-        Генерация персонализированного урока
-        Параметры: type, difficulty, target_letters, target_bigrams
-        """
+        # 1. Валидация входных данных
+        request_serializer = GenerateLessonRequestSerializer(data=request.data)
+        request_serializer.is_valid(raise_exception=True)
+
+        # 2. Генерация урока
         generator = LessonGenerator(request.user)
+        lesson_data = generator.generate(**request_serializer.validated_data)
 
-        # Получаем параметры или используем статистику пользователя
-        lesson_type = request.data.get('type', 'auto')  # auto - определит сам
-        difficulty = request.data.get('difficulty')
-        target_letters = request.data.get('target_letters')
-        target_bigrams = request.data.get('target_bigrams')
-
-        # Генерация урока
-        lesson_data = generator.generate(
-            lesson_type=lesson_type,
-            difficulty=difficulty,
-            target_letters=target_letters,
-            target_bigrams=target_bigrams
+        # 3. Сериализация ответа
+        response_serializer = GeneratedLessonResponseSerializer(
+            data=lesson_data
         )
+        response_serializer.is_valid(raise_exception=True)
 
-        # Сериализация ответа
-        serializer = GeneratedLessonSerializer(data=lesson_data)
-        serializer.is_valid(raise_exception=True)
+        return Response(response_serializer.data, status=status.HTTP_200_OK)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
-'''
 
 # Доп. функционал
 '''

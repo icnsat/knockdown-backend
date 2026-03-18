@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import TrainingSession, LetterStatistics, BigramStatistics
 from lessons.serializers import UserLessonProgressSerializer
+from .services import DailyStatsService
 
 
 class LetterStatsSerializer(serializers.ModelSerializer):
@@ -142,5 +143,8 @@ class TrainingSessionSerializer(serializers.ModelSerializer):
             )
             bigram_serializer.is_valid(raise_exception=True)
             bigram_serializer.save()
+
+        # 5. Обновляем дневную статистику
+        DailyStatsService.update_all(session)
 
         return session
