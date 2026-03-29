@@ -1,5 +1,5 @@
 import random
-from django.db.models import Sum, Avg
+from django.db.models import Sum, Avg, Q
 from django.utils import timezone
 from datetime import timedelta
 from .models import DictionaryWord
@@ -121,13 +121,32 @@ class LessonGenerator:
         # Если нет статистики - частотные биграммы русского языка
         return ['ст', 'но', 'то', 'на', 'по'][:limit]
 
-    def find_words_by_letters(self, letters, limit=30):
-        """Поиск слов в DictionaryWord по буквам"""
+    # def find_words_by_letters(self, letters, limit=30):
+    #     """Поиск слов в DictionaryWord по буквам"""
 
-        queryset = DictionaryWord.objects.filter(length__range=(3, 15))
+    #     queryset = DictionaryWord.objects.filter(length__range=(3, 15))
+    #     for letter in letters:
+    #         queryset = queryset.filter(letters__contains=letter)
+    #     return list(queryset.values_list('word', flat=True)[:limit])
+
+    def find_words_by_letters(self, letters, limit=30):
+        """Поиск слов, содержащих ХОТЯ БЫ ОДНУ из указанных букв"""
+
+        # Создаем OR условие для всех букв
+        query = Q()
         for letter in letters:
-            queryset = queryset.filter(letters__contains=letter)
-        return list(queryset.values_list('word', flat=True)[:limit])
+            query |= Q(letters__contains=letter)  # OR для каждой буквы
+
+        # Получаем все подходящие слова
+        words_qs = DictionaryWord.objects.filter(query).order_by('-frequency')
+        all_words = list(words_qs.values_list('word', flat=True))
+
+        # Если слов меньше чем нужно, возвращаем все
+        if len(all_words) <= limit:
+            return all_words
+
+        # Иначе возвращаем случайные limit штук
+        return random.sample(all_words, limit)
 
     def find_words_by_bigrams(self, bigrams, limit=30):
         """Поиск слов в DictionaryWord по биграммам"""

@@ -34,10 +34,15 @@ class TrainingSession(models.Model):
     class Meta:
         ordering = ['-finished_at']
 
+    # def __str__(self):
+    #     return (
+    #         f"{self.user.username}: {self.lesson.order_index}. "
+    #         f"{self.lesson.title} - {self.average_speed_wpm} wpm"
+    #     )
+
     def __str__(self):
         return (
-            f"{self.user.username}: {self.lesson.order_index}. "
-            f"{self.lesson.title} - {self.average_speed_wpm} wpm"
+            f"{self.user.username}"
         )
 
 
@@ -56,6 +61,11 @@ class DailyStatistics(models.Model):
             models.Index(fields=['user', '-date']),
         ]
 
+    def __str__(self):
+        return (
+            f"{self.date} - {self.user.username}"
+        )
+
 
 class LetterStatistics(models.Model):
     session = models.ForeignKey(TrainingSession, on_delete=models.CASCADE)
@@ -71,10 +81,15 @@ class LetterStatistics(models.Model):
             models.Index(fields=['user', 'letter']),
         ]
 
+    # def __str__(self):
+    #     return (
+    #         f"{self.user.username}: {self.session.lesson.order_index}. "
+    #         f"{self.session.lesson.title} - '{self.letter}'"
+    #     )
+
     def __str__(self):
         return (
-            f"{self.user.username}: {self.session.lesson.order_index}. "
-            f"{self.session.lesson.title} - '{self.letter}'"
+            f"{self.user.username}: '{self.letter}'"
         )
 
 
@@ -89,13 +104,18 @@ class DailyLetterStatistics(models.Model):
     class Meta:
         unique_together = ['user', 'date', 'letter']
 
+    def __str__(self):
+        return (
+            f"{self.date} - {self.user.username}: '{self.letter}'"
+        )
+
 
 class BigramStatistics(models.Model):
     session = models.ForeignKey(TrainingSession, on_delete=models.CASCADE)
     user = models.ForeignKey('users.User', on_delete=models.CASCADE)
     bigram = models.CharField(
         max_length=6,
-    )  # 'ab', 'a\t', '\ls\e', '\ls\rs'
+    )  # 'ab', 'a\t', '\ls\rs' or '\l\r' - haven't decided yet
     occurrences = models.IntegerField(default=0)
     errors = models.IntegerField(default=0)
     average_transition_time_ms = models.FloatField()
@@ -106,10 +126,15 @@ class BigramStatistics(models.Model):
             models.Index(fields=['user', 'bigram']),
         ]
 
+    # def __str__(self):
+    #     return (
+    #         f"{self.user.username}: {self.session.lesson.order_index}. "
+    #         f"{self.session.lesson.title} - '{self.bigram}'"
+    #     )
+
     def __str__(self):
         return (
-            f"{self.user.username}: {self.session.lesson.order_index}. "
-            f"{self.session.lesson.title} - '{self.bigram}'"
+            f"{self.user.username}: '{self.bigram}'"
         )
 
 
@@ -123,3 +148,8 @@ class DailyBigramStatistics(models.Model):
 
     class Meta:
         unique_together = ['user', 'date', 'bigram']
+
+    def __str__(self):
+        return (
+            f"{self.date} - {self.user.username}: '{self.bigram}'"
+        )

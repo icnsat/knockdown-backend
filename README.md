@@ -75,7 +75,7 @@ TODO:
 
 2) Now lessons are being generated using error rate. Consider speed?
 
-
-
 NOT TESTED YET: added daily stats update (general, letters, bigrams) & created lesson generation -> sqlite doesn't support "overlap" in JSON fields :/ sad
+
+3) Lesson, letters, bigrams stats in django admin
 -->
