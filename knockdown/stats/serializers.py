@@ -1,5 +1,10 @@
 from rest_framework import serializers
-from .models import TrainingSession, LetterStatistics, BigramStatistics
+from .models import (
+    TrainingSession,
+    LetterStatistics,
+    BigramStatistics,
+    DailyStatistics
+)
 from lessons.serializers import UserLessonProgressSerializer
 from .services import DailyStatsService
 
@@ -148,3 +153,38 @@ class TrainingSessionSerializer(serializers.ModelSerializer):
         DailyStatsService.update_all(session)
 
         return session
+
+
+class DashboardStatsSerializer(serializers.Serializer):
+    """Сериализатор для общей статистики пользователя"""
+    total_sessions = serializers.IntegerField()
+    total_time = serializers.IntegerField()
+    avg_speed = serializers.IntegerField()
+    best_speed = serializers.IntegerField()
+    avg_accuracy = serializers.IntegerField()
+
+
+class DailyStatisticsSerializer(serializers.ModelSerializer):
+    """Сериализатор для дневной статистики"""
+    date = serializers.DateField(format='%d-%m-%Y')
+
+    class Meta:
+        model = DailyStatistics
+        fields = ['date', 'average_speed_wpm', 'average_accuracy_percentage',
+                  'best_speed_wpm', 'total_sessions']
+
+
+class ProblemLetterSerializer(serializers.Serializer):
+    letter = serializers.CharField()
+    occurrences = serializers.IntegerField()
+    errors = serializers.IntegerField()
+    error_percent = serializers.FloatField()
+    avg_time = serializers.FloatField()
+
+
+class ProblemBigramSerializer(serializers.Serializer):
+    bigram = serializers.CharField()
+    occurrences = serializers.IntegerField()
+    errors = serializers.IntegerField()
+    error_percent = serializers.FloatField()
+    avg_time = serializers.FloatField()

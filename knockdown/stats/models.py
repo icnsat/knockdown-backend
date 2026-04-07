@@ -34,16 +34,16 @@ class TrainingSession(models.Model):
     class Meta:
         ordering = ['-finished_at']
 
-    # def __str__(self):
-    #     return (
-    #         f"{self.user.username}: {self.lesson.order_index}. "
-    #         f"{self.lesson.title} - {self.average_speed_wpm} wpm"
-    #     )
-
     def __str__(self):
-        return (
-            f"{self.user.username}"
-        )
+        if self.lesson:
+            info = (
+                f"{self.lesson.order_index}. "
+                f"{self.lesson.title}"
+            )
+        else:
+            info = "Сгенерированный урок"
+
+        return f"{self.user.username}: {info} - {self.average_speed_wpm} wpm"
 
 
 class DailyStatistics(models.Model):
@@ -81,16 +81,16 @@ class LetterStatistics(models.Model):
             models.Index(fields=['user', 'letter']),
         ]
 
-    # def __str__(self):
-    #     return (
-    #         f"{self.user.username}: {self.session.lesson.order_index}. "
-    #         f"{self.session.lesson.title} - '{self.letter}'"
-    #     )
-
     def __str__(self):
-        return (
-            f"{self.user.username}: '{self.letter}'"
-        )
+        if self.session and self.session.lesson:
+            info = (
+                f"{self.session.lesson.order_index}. "
+                f"{self.session.lesson.title}"
+            )
+        else:
+            info = "Сгенерированный урок"
+
+        return f"{self.user.username}: {info} - '{self.letter}'"
 
 
 class DailyLetterStatistics(models.Model):
@@ -126,16 +126,17 @@ class BigramStatistics(models.Model):
             models.Index(fields=['user', 'bigram']),
         ]
 
-    # def __str__(self):
-    #     return (
-    #         f"{self.user.username}: {self.session.lesson.order_index}. "
-    #         f"{self.session.lesson.title} - '{self.bigram}'"
-    #     )
-
     def __str__(self):
-        return (
-            f"{self.user.username}: '{self.bigram}'"
-        )
+        # Безопасное получение номера урока и названия
+        if self.session and self.session.lesson:
+            info = (
+                f"{self.session.lesson.order_index}. "
+                f"{self.session.lesson.title}"
+            )
+        else:
+            info = "Сгенерированный урок"
+
+        return f"{self.user.username}: {info} - '{self.bigram}'"
 
 
 class DailyBigramStatistics(models.Model):

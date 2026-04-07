@@ -32,6 +32,11 @@ URLs:
 - GET /api/stats/sessions/{id}/ - детали одной сессии
 - POST /api/stats/sessions/ - сохранить сессию тренировки (с обновлением прогресса, статистики букв и биграмм)
 - DELETE /api/stats/sessions/{id}/ - удалить сессию
+- GET /api/stats/dashboard/ - агрегированная краткая статистика пользователя
+- GET /api/stats/daily/ - агрегированная дневная статистика за 30 дней
+- GET /api/stats/letters/ - проблемные буквы
+- GET /api/stats/bigrams/ - проблемные биграммы
+
 
 -->
 
@@ -70,12 +75,8 @@ POST /api/stats/sessions/
 TODO:
 1) Decide what to do with this:
 - GET /api/lessons/recommended/ - рекомендованные уроки
-- GET /api/stats/letters/, /bigrams/ - детальная статистика
-- GET /api/stats/problem-letters/, /problem-bigrams/ - проблемные зоны
 
 2) Now lessons are being generated using error rate. Consider speed?
 
 NOT TESTED YET: added daily stats update (general, letters, bigrams) & created lesson generation -> sqlite doesn't support "overlap" in JSON fields :/ sad
-
-3) Lesson, letters, bigrams stats in django admin
 -->
