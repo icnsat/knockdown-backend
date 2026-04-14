@@ -169,22 +169,22 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-if DEBUG:
-    URL_PREFIX = ''
-else:
-    URL_PREFIX = '/knockdown-backend'
+# if DEBUG:
+#     URL_PREFIX = ''
+# else:
+#     URL_PREFIX = '/knockdown-backend'
 
-MEDIA_ROOT = BASE_DIR / 'media'
-STATIC_ROOT = BASE_DIR / 'staticfiles' / 'static'
-MEDIA_URL = f'{URL_PREFIX}/media/'
-STATIC_URL = f'{URL_PREFIX}/static/'
+# MEDIA_ROOT = BASE_DIR / 'media'
+# STATIC_ROOT = BASE_DIR / 'staticfiles' / 'static'
+# MEDIA_URL = f'{URL_PREFIX}/media/'
+# STATIC_URL = f'{URL_PREFIX}/static/'
 
-# STATIC_URL = '/static/'
-# STATIC_ROOT = os.path.join(BASE_DIR, 'static_build', 'static')
-# STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATIC_URL = '/staticfiles/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
-# MEDIA_URL = '/media/'
-# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 # Default primary key field type

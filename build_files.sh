@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 
-ln -sf knockdown/manage.py manage.py
-
 echo "Build packages"
-python3 -m pip install --break-system-packages -r requirements.txt
+python3 -m pip install -r requirements.txt
 
 echo "Making migrations"
 python3 manage.py makemigrations users
