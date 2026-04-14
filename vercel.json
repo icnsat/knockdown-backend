@@ -4,7 +4,7 @@
     "routes": [
         {
             "src": "/(.*)",
-            "dest": "knockdown/wsgi.py"
+            "dest": "knockdown/knockdown/wsgi.py"
         }
     ]
 }
