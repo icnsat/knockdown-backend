@@ -1,25 +1,15 @@
 {
-    "builds": [
-        {
-            "src": "knockdown/knockdown/wsgi.py",
-            "use": "@vercel/python",
-            "config": {
-                "maxLambdaSize": "15mb",
-                "runtime": "python3.14" 
-            }
-        },
-        {
-            "src": "build_files.sh",
-            "use": "@vercel/python",
-            "config": {
-                "runtime": "python3.14"
-            }
-        }
-    ],
+    "version": 2,
+    "buildCommand": "bash build_files.sh",
+    "outputDirectory": "staticfiles",
     "routes": [
         {
+            "src": "/static/(.*)",
+            "dest": "/static/$1"
+        },
+        {
             "src": "/(.*)",
-            "dest": "knockdown/knockdown/wsgi.py"
+            "dest": "knockdown/wsgi.py"
         }
     ]
 }
