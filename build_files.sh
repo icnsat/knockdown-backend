@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 echo "Build packages"
-python3 -m pip install -r requirements.txt
+python3 -m pip install --break-system-packages -r requirements.txt
 
 cd knockdown/
 
