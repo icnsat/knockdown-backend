@@ -6,5 +6,8 @@
             "src": "/(.*)",
             "dest": "knockdown/wsgi.py"
         }
-    ]
+    ],
+    "env": {
+        "DISABLE_COLLECTSTATIC": "1"
+    }
 }
