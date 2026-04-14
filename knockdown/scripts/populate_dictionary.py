@@ -9,7 +9,6 @@ sys.path.append(str(BASE_DIR))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'knockdown.settings')
 django.setup()
 
-
 from lessons.models import DictionaryWord
 
 
