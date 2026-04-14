@@ -65,7 +65,7 @@ if __name__ == '__main__':
     # clean_db()
 
     print("\nЗаполнение словаря...")
-    words = load_words_from_file('russian-dict.txt')
+    words = load_words_from_file('russian_dict.txt')
     created, skipped = save_words_to_db(words)
 
     print("\nИтог заполнения:")
