@@ -18,7 +18,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "knockdown/knockdown/wsgi.py"
+      "dest": "knockdown/wsgi.py"
     }
   ]
 }
