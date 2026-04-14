@@ -8,7 +8,7 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'secret')
-DEBUG = os.getenv('DEBUG', 'true') == 'true'
+DEBUG = os.getenv('DEBUG', 'false') == 'true'
 
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.vercel.app']
@@ -169,12 +169,22 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static_build', 'static')
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+if DEBUG:
+    URL_PREFIX = ''
+else:
+    URL_PREFIX = '/knockdown-backend'
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = BASE_DIR / 'media'
+STATIC_ROOT = BASE_DIR / 'staticfiles' / 'static'
+MEDIA_URL = f'{URL_PREFIX}/media/'
+STATIC_URL = f'{URL_PREFIX}/static/'
+
+# STATIC_URL = '/static/'
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static_build', 'static')
+# STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
+# MEDIA_URL = '/media/'
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 # Default primary key field type
