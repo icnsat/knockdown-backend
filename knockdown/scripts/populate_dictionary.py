@@ -15,7 +15,7 @@ from lessons.models import DictionaryWord
 
 def load_words_from_file(filename):
     """Чтение слов из файла"""
-    file_path = BASE_DIR / 'data' / filename
+    file_path = BASE_DIR / 'scripts' / filename
     words = []
 
     with open(file_path, 'r', encoding='utf-8') as f:
