@@ -1,18 +1,25 @@
 {
     "builds": [
         {
-            "src": "knockdown/wsgi.py",
+            "src": "knockdown/knockdown/wsgi.py",
             "use": "@vercel/python",
             "config": {
                 "maxLambdaSize": "15mb",
                 "runtime": "python3.14" 
+            }
+        },
+        {
+            "src": "build_files.sh",
+            "use": "@vercel/python",
+            "config": {
+                "runtime": "python3.14"
             }
         }
     ],
     "routes": [
         {
             "src": "/(.*)",
-            "dest": "knockdown/wsgi.py"
+            "dest": "knockdown/knockdown/wsgi.py"
         }
     ]
 }
