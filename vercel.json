@@ -1,10 +1,15 @@
 {
-    "version": 2,
-    "routes": [
+    "builds": [
         {
-            "src": "/static/(.*)",
-            "dest": "/static/$1"
-        },
+            "src": "knockdown/wsgi.py",
+            "use": "@vercel/python",
+            "config": {
+                "maxLambdaSize": "15mb",
+                "runtime": "python3.14" 
+            }
+        }
+    ],
+    "routes": [
         {
             "src": "/(.*)",
             "dest": "knockdown/wsgi.py"
