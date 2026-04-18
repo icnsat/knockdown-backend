@@ -121,7 +121,8 @@ class LetterStatsView(APIView):
                     ) if data['count'] > 0 else 0
                 })
 
-        result.sort(key=lambda x: x['error_percent'], reverse=True)
+        # Сортировка: сначала по проценту ошибок (от большего к меньшему), затем по времени перехода (от большего к меньшему)
+        result.sort(key=lambda x: (-x['error_percent'], -x['avg_time']))
 
         serializer = ProblemLetterSerializer(result[:15], many=True)
         return Response(serializer.data)

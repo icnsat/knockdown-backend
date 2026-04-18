@@ -158,29 +158,31 @@ class LessonGenerator:
     #     return list(queryset.values_list('word', flat=True))
 
     def find_words_by_bigrams(self, bigrams, limit=30):
-        """Поиск слов в DictionaryWord по биграммам"""
+        """Поиск слов, содержащих ХОТЯ БЫ ОДНУ из указанных биграмм"""
 
-        # PostgreSQL: используем overlap
+        # PostgreSQL: используем ORM запрос
         if connection.vendor == 'postgresql':
-            queryset = DictionaryWord.objects.filter(
-                bigrams__overlap=bigrams
-            ).order_by('-frequency')[:limit]
-            words = list(queryset.values_list('word', flat=True))
+            from django.db.models import Q
+            query = Q()
+            for bigram in bigrams:
+                query |= Q(bigrams__contains=[bigram])
+            words_qs = DictionaryWord.objects.filter(query).order_by('-frequency')
+            all_words = list(words_qs.values_list('word', flat=True))
+
+            if len(all_words) <= limit:
+                return all_words
+            return random.sample(all_words, limit)
+
+        # SQLite: фильтрация в Python
         else:
-            # SQLite: фильтрация в Python
             all_words = DictionaryWord.objects.all().order_by('-frequency')
-            words = []
+            result = []
             for word_obj in all_words:
                 if any(bigram in word_obj.bigrams for bigram in bigrams):
-                    words.append(word_obj.word)
-                    if len(words) >= limit:
+                    result.append(word_obj.word)
+                    if len(result) >= limit:
                         break
-
-        # Fallback
-        if not words:
-            words = ['слово', 'тренировка', 'биграмма', 'печать', 'текст']
-        
-        return words
+            return result
 
     def build_lesson_text(self, words, length=200):
         """Составляет текст из слов"""
