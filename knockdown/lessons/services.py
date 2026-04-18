@@ -2,6 +2,7 @@ import random
 from django.db.models import Sum, Avg, Q
 from django.utils import timezone
 from datetime import timedelta
+from django.db import connection
 from .models import DictionaryWord
 from stats.models import DailyLetterStatistics, DailyBigramStatistics
 
@@ -148,13 +149,38 @@ class LessonGenerator:
         # Иначе возвращаем случайные limit штук
         return random.sample(all_words, limit)
 
+    # def find_words_by_bigrams(self, bigrams, limit=30):
+    #     """Поиск слов в DictionaryWord по биграммам"""
+
+    #     queryset = DictionaryWord.objects.filter(
+    #         bigrams__overlap=bigrams
+    #     ).order_by('-frequency')[:limit]
+    #     return list(queryset.values_list('word', flat=True))
+
     def find_words_by_bigrams(self, bigrams, limit=30):
         """Поиск слов в DictionaryWord по биграммам"""
 
-        queryset = DictionaryWord.objects.filter(
-            bigrams__overlap=bigrams
-        ).order_by('-frequency')[:limit]
-        return list(queryset.values_list('word', flat=True))
+        # PostgreSQL: используем overlap
+        if connection.vendor == 'postgresql':
+            queryset = DictionaryWord.objects.filter(
+                bigrams__overlap=bigrams
+            ).order_by('-frequency')[:limit]
+            words = list(queryset.values_list('word', flat=True))
+        else:
+            # SQLite: фильтрация в Python
+            all_words = DictionaryWord.objects.all().order_by('-frequency')
+            words = []
+            for word_obj in all_words:
+                if any(bigram in word_obj.bigrams for bigram in bigrams):
+                    words.append(word_obj.word)
+                    if len(words) >= limit:
+                        break
+
+        # Fallback
+        if not words:
+            words = ['слово', 'тренировка', 'биграмма', 'печать', 'текст']
+        
+        return words
 
     def build_lesson_text(self, words, length=200):
         """Составляет текст из слов"""

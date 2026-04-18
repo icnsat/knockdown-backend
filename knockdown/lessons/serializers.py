@@ -312,14 +312,12 @@ class GeneratedLessonResponseSerializer(serializers.Serializer):
     """Для ответа с сгенерированным уроком"""
     title = serializers.CharField()
     content = serializers.CharField()
-    difficulty_level = serializers.IntegerField()
     lesson_type = serializers.CharField()
-    target_letters = serializers.ListField(
+    difficulty_level = serializers.IntegerField()
+    target = serializers.ListField(
         child=serializers.CharField(),
         required=False
     )
-    target_bigrams = serializers.ListField(
-        child=serializers.CharField(),
-        required=False
-    )
+    required_speed = serializers.IntegerField()
+    required_accuracy = serializers.FloatField()
     word_count = serializers.IntegerField()
