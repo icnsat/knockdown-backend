@@ -34,3 +34,14 @@ class UserCreateSerializer(serializers.ModelSerializer):
                 {"password": "Passwords don't match"}
             )
         return attrs
+
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            email=validated_data.get('email', ''),
+            password=validated_data['password'],
+            theme=validated_data.get('theme', True),
+            language=validated_data.get('language', 'RUS'),
+            keyboard_layout=validated_data.get('keyboard_layout', 'JCUKEN')
+        )
+        return user
