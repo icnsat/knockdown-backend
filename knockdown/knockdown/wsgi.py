@@ -16,3 +16,6 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'knockdown.settings')
 application = get_wsgi_application()
 
 app = application
+
+from whitenoise import WhiteNoise
+application = WhiteNoise(application, root='staticfiles')
