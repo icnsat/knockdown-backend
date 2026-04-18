@@ -96,7 +96,7 @@ class LetterStatistics(models.Model):
 class DailyLetterStatistics(models.Model):
     user = models.ForeignKey('users.User', on_delete=models.CASCADE)
     date = models.DateField()
-    letter = models.CharField(max_length=1)
+    letter = models.CharField(max_length=3)
     total_occurrences = models.IntegerField(default=0)
     total_errors = models.IntegerField(default=0)
     average_hit_time_ms = models.FloatField()
