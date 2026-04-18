@@ -8,8 +8,6 @@ echo "Build packages"
 
 python3 -m pip install --break-system-packages -r requirements.txt
 
-cd knockdown/
-
 echo "Making migrations"
 python3 manage.py makemigrations users
 python3 manage.py makemigrations lessons
