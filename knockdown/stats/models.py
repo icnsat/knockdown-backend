@@ -142,7 +142,7 @@ class BigramStatistics(models.Model):
 class DailyBigramStatistics(models.Model):
     user = models.ForeignKey('users.User', on_delete=models.CASCADE)
     date = models.DateField()
-    bigram = models.CharField(max_length=2)
+    bigram = models.CharField(max_length=6)
     total_occurrences = models.IntegerField(default=0)
     total_errors = models.IntegerField(default=0)
     average_transition_time_ms = models.FloatField()
