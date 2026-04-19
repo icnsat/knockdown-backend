@@ -3,7 +3,7 @@
 Серверная часть веб-приложения для обучения слепому методу печати с адаптивной системой упражнений.
 
 > [!NOTE] 
-> Клиентская часть приложения доступна в репозитории [knockdown-frontend](https://github.com/icnsat/knockdown-frontend).
+> Клиентская часть веб-приложения доступна в репозитории [knockdown-frontend](https://github.com/icnsat/knockdown-frontend).
 
 ## Используемые технологии
 
@@ -149,7 +149,7 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-Сервер будет запущен на `localhost:8080`.
+Сервер будет запущен на `localhost:8000`.
 
 
 <!--
