@@ -52,8 +52,8 @@ class UserLessonProgress(models.Model):
 
 class DictionaryWord(models.Model):
     """Словарь для генерации уроков"""
-    word = models.CharField(max_length=30, unique=True)  # само слово
-    length = models.IntegerField()  # длина слова
+    word = models.CharField(max_length=30, unique=True)
+    length = models.IntegerField()
     frequency = models.IntegerField(default=1)  # частотность (1-1000)
 
     # Для быстрого поиска:
@@ -64,7 +64,7 @@ class DictionaryWord(models.Model):
         indexes = [
             models.Index(fields=['length']),
             models.Index(fields=['frequency']),
-            models.Index(fields=['letters']),  # для поиска по буквам
+            models.Index(fields=['letters']),
         ]
         ordering = ['word']
 

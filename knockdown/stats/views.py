@@ -23,11 +23,9 @@ class TrainingSessionViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        # Каждый видит только свои сессии
         return TrainingSession.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        # Автоматически привязываем пользователя
         serializer.save(user=self.request.user)
 
     # PUT, PATCH отключаем пока
@@ -59,14 +57,6 @@ class DashboardStatsView(APIView):
 
         serializer = DashboardStatsSerializer(data)
         return Response(serializer.data)
-
-        # return Response({
-        #     'total_sessions': stats['total_sessions'] or 0,
-        #     'total_time': round((stats['total_time'] or 0) / 60),  # в мин
-        #     'avg_speed': round(stats['avg_speed'] or 0),
-        #     'best_speed': stats['best_speed'] or 0,
-        #     'avg_accuracy': round(stats['avg_accuracy'] or 0),
-        # })
 
 
 class DailyStatsView(APIView):

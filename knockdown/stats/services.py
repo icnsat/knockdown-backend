@@ -36,13 +36,11 @@ class DailyStatsService:
             }
         )
 
-        # Получаем все сессии за день (включая новую)
         sessions = TrainingSession.objects.filter(
             user=user,
             finished_at__date=date
         )
 
-        # Пересчитываем агрегаты
         total_time = sum(s.total_duration_seconds for s in sessions)
         total_sessions = sessions.count()
         best_speed = max(s.average_speed_wpm for s in sessions)
@@ -51,7 +49,6 @@ class DailyStatsService:
             s.accuracy_percentage for s in sessions
         ) / total_sessions
 
-        # Обновляем запись
         daily.total_training_time_seconds = total_time
         daily.total_sessions = total_sessions
         daily.best_speed_wpm = best_speed
@@ -62,20 +59,17 @@ class DailyStatsService:
     @staticmethod
     def update_letter_stats(user, date):
         """Обновление дневной статистики по буквам"""
-        # Получаем все статистики по буквам за день
         letter_stats = LetterStatistics.objects.filter(
             user=user,
             session__finished_at__date=date
         )
 
-        # Группируем по буквам
         aggregated = letter_stats.values('letter').annotate(
             total_occurrences=Sum('occurrences'),
             total_errors=Sum('errors'),
             avg_time=Avg('average_hit_time_ms')
         )
 
-        # Сохраняем или обновляем дневные записи
         for stat in aggregated:
             DailyLetterStatistics.objects.update_or_create(
                 user=user,

@@ -94,7 +94,6 @@ class TrainingSessionSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         """Дополнительные проверки"""
-        # Проверяем что finished_at > started_at
         if data.get('started_at') and data.get('finished_at'):
             if data['finished_at'] <= data['started_at']:
                 raise serializers.ValidationError({
@@ -102,7 +101,6 @@ class TrainingSessionSerializer(serializers.ModelSerializer):
                     'Время окончания должно быть позже времени начала'
                 })
 
-        # Проверяем что длительность логична
         if (
             data.get('total_duration_seconds')
             and data.get('started_at')
@@ -120,18 +118,14 @@ class TrainingSessionSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        # Извлекаем статистику
         letter_stats_data = validated_data.pop('letter_stats', [])
         bigram_stats_data = validated_data.pop('bigram_stats', [])
 
-        # 1. Сохраняем сессию
         session = super().create(validated_data)
 
-        # 2. Обновляем прогресс урока
         if session.lesson:
             UserLessonProgressSerializer().update_from_session(session)
 
-        # 3. Сохраняем статистику букв
         for data in letter_stats_data:
             letter_serializer = LetterStatsSerializer(
                 data=data,
@@ -140,7 +134,6 @@ class TrainingSessionSerializer(serializers.ModelSerializer):
             letter_serializer.is_valid(raise_exception=True)
             letter_serializer.save()
 
-        # 4. Сохраняем статистику биграмм
         for data in bigram_stats_data:
             bigram_serializer = BigramStatsSerializer(
                 data=data,
@@ -149,7 +142,6 @@ class TrainingSessionSerializer(serializers.ModelSerializer):
             bigram_serializer.is_valid(raise_exception=True)
             bigram_serializer.save()
 
-        # 5. Обновляем дневную статистику
         DailyStatsService.update_all(session)
 
         return session

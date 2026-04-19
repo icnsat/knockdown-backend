@@ -62,7 +62,7 @@ class LessonDetailSerializer(LessonSerializer):
         return None
 
     def get_is_unlocked(self, obj):
-        """Проверяет, доступен ли урок пользователю"""
+        """Проверка, доступен ли урок пользователю"""
         if obj.order_index == 1:
             return True  # первый урок всегда доступен
 
@@ -115,106 +115,6 @@ class LessonListSerializer(serializers.ModelSerializer):
         return None
 
 
-'''
-class UserLessonProgressSerializer(serializers.ModelSerializer):
-    """DELETED - Ручное управление прогрессом пользователя"""
-    lesson_title = serializers.CharField(source='lesson.title', read_only=True)
-    lesson_type = serializers.CharField(
-        source='lesson.lesson_type',
-        read_only=True
-    )
-
-    class Meta:
-        model = UserLessonProgress
-        fields = [
-            'id', 'user', 'lesson', 'lesson_title', 'lesson_type',
-            'best_speed', 'best_accuracy', 'completion_count',
-            'last_completed_at', 'is_passed', 'passed_at'
-        ]
-        read_only_fields = [
-            'id', 'user', 'lesson', 'lesson_title', 'lesson_type',
-            'passed_at'  # passed_at устанавливается автоматически
-        ]
-
-    def validate(self, data):
-        """Проверяем логику обновления прогресса"""
-        instance = self.instance
-
-        if instance:
-            # При обновлении проверяем, что лучшие результаты улучшаются
-            if ('best_speed' in data and
-               data['best_speed'] < instance.best_speed):
-                raise serializers.ValidationError({
-                    'best_speed': 'Новая скорость должна быть выше предыдущей'
-                })
-
-            if ('best_accuracy' in data and
-               data['best_accuracy'] < instance.best_accuracy):
-                raise serializers.ValidationError({
-                    'best_accuracy':
-                    'Новая точность должна быть выше предыдущей'
-                })
-
-        return data
-
-    def update(self, instance, validated_data):
-        """Автоматически устанавливаем passed_at при прохождении"""
-        if 'is_passed' in validated_data and validated_data['is_passed']:
-            if not instance.is_passed:  # только если раньше не был пройден
-                validated_data['passed_at'] = timezone.now()
-
-        return super().update(instance, validated_data)
-
-
-class LessonProgressUpdateSerializer(serializers.Serializer):
-    """REPLACED - Автоматическое обновление прогресса после тренировки"""
-    lesson_id = serializers.IntegerField()
-    speed = serializers.IntegerField(min_value=0)
-    accuracy = serializers.FloatField(min_value=0, max_value=100)
-
-    def update_progress(self, user):
-        """Основная логика обновления прогресса"""
-        lesson_id = self.validated_data['lesson_id']
-        speed = self.validated_data['speed']
-        accuracy = self.validated_data['accuracy']
-
-        lesson = Lesson.objects.get(id=lesson_id)
-
-        # Получаем или создаем прогресс
-        progress, created = UserLessonProgress.objects.get_or_create(
-            user=user,
-            lesson=lesson,
-            defaults={
-                'best_speed': speed,
-                'best_accuracy': accuracy,
-                'completion_count': 1,
-                'last_completed_at': timezone.now()
-            }
-        )
-
-        if not created:
-            # Обновляем лучшие результаты
-            if speed > progress.best_speed:
-                progress.best_speed = speed
-
-            if accuracy > progress.best_accuracy:
-                progress.best_accuracy = accuracy
-
-            progress.completion_count += 1
-            progress.last_completed_at = timezone.now()
-
-        # Проверяем выполнение требований
-        if (speed >= lesson.required_speed and
-           accuracy >= lesson.required_accuracy and
-           not progress.is_passed):
-            progress.is_passed = True
-            progress.passed_at = timezone.now()
-
-        progress.save()
-        return progress
-'''
-
-
 class UserLessonProgressSerializer(serializers.ModelSerializer):
     """Только для чтения прогресса. Создание/обновление - автоматически."""
     lesson_title = serializers.CharField(source='lesson.title', read_only=True)
@@ -262,7 +162,7 @@ class UserLessonProgressSerializer(serializers.ModelSerializer):
         )
 
         if not created:
-            # Обновляем лучшие результаты
+            # Обновление лучшие результаты
             if session.average_speed_wpm > progress.best_speed:
                 progress.best_speed = session.average_speed_wpm
 
@@ -272,7 +172,7 @@ class UserLessonProgressSerializer(serializers.ModelSerializer):
             progress.completion_count += 1
             progress.last_completed_at = session.finished_at
 
-        # Проверяем выполнение требований урока
+        # Проверка выполнение требований урока
         if (
             session.average_speed_wpm >= session.lesson.required_speed and
             session.accuracy_percentage >= session.lesson.required_accuracy and
@@ -309,7 +209,7 @@ class GenerateLessonRequestSerializer(serializers.Serializer):
 
 
 class GeneratedLessonResponseSerializer(serializers.Serializer):
-    """Для ответа с сгенерированным уроком"""
+    """Для ответа со сгенерированным уроком"""
     title = serializers.CharField()
     content = serializers.CharField()
     lesson_type = serializers.CharField()

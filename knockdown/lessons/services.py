@@ -36,7 +36,7 @@ class LessonGenerator:
         с каскадным расширением периода
         """
 
-        # Пробуем разные периоды: 7, 14, 30, 90 дней, все время
+        # Перебор разных периоды: 7, 14, 30, 90 дней, все время
         periods = [7, 14, 30, 90, 365, None]  # None = все время
 
         for days in periods:
@@ -51,7 +51,6 @@ class LessonGenerator:
                 stats = DailyLetterStatistics.objects.filter(user=self.user)
 
             if stats.exists():
-                # Агрегируем
                 aggregated = stats.values('letter').annotate(
                     total_occ=Sum('total_occurrences'),
                     total_err=Sum('total_errors')
@@ -67,14 +66,13 @@ class LessonGenerator:
                             })
 
                 if problem_letters:
-                    # Сортируем по убыванию ошибок
                     problem_letters.sort(
                         key=lambda x: x['error_rate'], reverse=True
                     )
                     return [item['letter'] for item in problem_letters[:limit]]
 
-        # 3. Если вообще нет статистики - возвращаем частотные буквы
-        return ['а', 'о', 'е', 'и', 'н'][:limit]  # самые частые буквы в русском
+        # Если нет статистики - возвращаются частотные буквы
+        return ['а', 'о', 'е', 'и', 'н'][:limit]
 
     def get_problem_bigrams(
             self, limit=5, days_delta=7, min_occurrences=5, error_threshold=15
@@ -112,65 +110,51 @@ class LessonGenerator:
                             })
 
                 if problem_bigrams:
-                    # Сортируем по убыванию процента ошибок
                     problem_bigrams.sort(
                         key=lambda x: x['error_rate'], reverse=True
                     )
-                    # Берем ТОП-N
                     return [item['bigram'] for item in problem_bigrams[:limit]]
 
         # Если нет статистики - частотные биграммы русского языка
         return ['ст', 'но', 'то', 'на', 'по'][:limit]
 
-    # def find_words_by_letters(self, letters, limit=30):
-    #     """Поиск слов в DictionaryWord по буквам"""
-
-    #     queryset = DictionaryWord.objects.filter(length__range=(3, 15))
-    #     for letter in letters:
-    #         queryset = queryset.filter(letters__contains=letter)
-    #     return list(queryset.values_list('word', flat=True)[:limit])
-
     def find_words_by_letters(self, letters, limit=30):
         """Поиск слов, содержащих ХОТЯ БЫ ОДНУ из указанных букв"""
 
-        # Создаем OR условие для всех букв
+        # Создается OR условие для всех букв
         query = Q()
         for letter in letters:
             query |= Q(letters__contains=letter)  # OR для каждой буквы
 
-        # Получаем все подходящие слова
+        # Получаются все подходящие слова
         words_qs = DictionaryWord.objects.filter(query).order_by('-frequency')
         all_words = list(words_qs.values_list('word', flat=True))
 
-        # Если слов меньше чем нужно, возвращаем все
+        # Если слов меньше чем нужно, возвращаются все
         if len(all_words) <= limit:
             return all_words
 
-        # Иначе возвращаем случайные limit штук
+        # Иначе возвращаются случайные limit штук
         return random.sample(all_words, limit)
-
-    # def find_words_by_bigrams(self, bigrams, limit=30):
-    #     """Поиск слов в DictionaryWord по биграммам"""
-
-    #     queryset = DictionaryWord.objects.filter(
-    #         bigrams__overlap=bigrams
-    #     ).order_by('-frequency')[:limit]
-    #     return list(queryset.values_list('word', flat=True))
 
     def find_words_by_bigrams(self, bigrams, limit=30):
         """Поиск слов, содержащих ХОТЯ БЫ ОДНУ из указанных биграмм"""
 
         # PostgreSQL: используем ORM запрос
         if connection.vendor == 'postgresql':
-            from django.db.models import Q
             query = Q()
+
             for bigram in bigrams:
                 query |= Q(bigrams__contains=[bigram])
-            words_qs = DictionaryWord.objects.filter(query).order_by('-frequency')
+
+            words_qs = DictionaryWord.objects.filter(
+                query
+            ).order_by('-frequency')
             all_words = list(words_qs.values_list('word', flat=True))
 
             if len(all_words) <= limit:
                 return all_words
+
             return random.sample(all_words, limit)
 
         # SQLite: фильтрация в Python
@@ -185,7 +169,7 @@ class LessonGenerator:
             return result
 
     def build_lesson_text(self, words, length=200):
-        """Составляет текст из слов"""
+        """Составление текста из слов"""
 
         selected = random.sample(words, min(len(words), length//5))
         return ' '.join(selected)

@@ -2,13 +2,6 @@ from django.db import models
 
 
 class TrainingSession(models.Model):
-    # EXERCISE_TYPES = [
-    #     ('lesson', 'Урок'),
-    #     ('words', 'Слова'),
-    #     ('text', 'Текст'),
-    #     ('free', 'Свободный набор'),
-    # ]
-
     user = models.ForeignKey('users.User', on_delete=models.CASCADE)
     lesson = models.ForeignKey(
         'lessons.Lesson',
@@ -16,14 +9,12 @@ class TrainingSession(models.Model):
         null=True,
         blank=True
     )
-    # exercise_type = models.CharField(max_length=20, choices=EXERCISE_TYPES)
-    # lesson_title = models.CharField(max_length=255, blank=True)
 
     # Статистика
     total_duration_seconds = models.IntegerField()
     total_characters_typed = models.IntegerField()
     total_errors = models.IntegerField()
-    average_speed_wpm = models.FloatField()  # знаков в минуту
+    average_speed_wpm = models.FloatField()
     accuracy_percentage = models.FloatField()
 
     # Мета
@@ -69,8 +60,8 @@ class DailyStatistics(models.Model):
 
 class LetterStatistics(models.Model):
     session = models.ForeignKey(TrainingSession, on_delete=models.CASCADE)
-    user = models.ForeignKey('users.User', on_delete=models.CASCADE)  # денормализация
-    letter = models.CharField(max_length=3)   # спец клавиши
+    user = models.ForeignKey('users.User', on_delete=models.CASCADE)
+    letter = models.CharField(max_length=3)  # '\s'
     occurrences = models.IntegerField(default=0)
     errors = models.IntegerField(default=0)
     average_hit_time_ms = models.FloatField()
@@ -115,7 +106,7 @@ class BigramStatistics(models.Model):
     user = models.ForeignKey('users.User', on_delete=models.CASCADE)
     bigram = models.CharField(
         max_length=6,
-    )  # 'ab', 'a\t', '\ls\rs' or '\l\r' - haven't decided yet
+    )  # 'ab', 'a\s'
     occurrences = models.IntegerField(default=0)
     errors = models.IntegerField(default=0)
     average_transition_time_ms = models.FloatField()
@@ -127,7 +118,6 @@ class BigramStatistics(models.Model):
         ]
 
     def __str__(self):
-        # Безопасное получение номера урока и названия
         if self.session and self.session.lesson:
             info = (
                 f"{self.session.lesson.order_index}. "
